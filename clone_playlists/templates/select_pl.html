@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Playlist to Clone</title>
+</head>
+<body>
+    <h1>Select a playlist to clone:</h1>
+    <form method="POST" action="/clone_playlist">
+
+        <select name="playlist_id">
+            {% for playlist in playlists %}
+            <option value="{{ playlist.id }}">{{ playlist.name }}</option> <!-- regresa id, despliega name-->
+            {% endfor %}
+        </select>
+
+        <!-- Add the text input field here -->
+        <label for="playlist_name">Enter a new playlist name:</label>
+        <input type="text" id="playlist_name" name="playlist_name">
+
+        <button type="submit">Clone Playlist</button> <!--confirma clonar con el boton-->
+
+    </form>
+</body>
