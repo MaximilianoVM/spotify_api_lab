@@ -14,6 +14,7 @@ TOKEN_INFO = 'token_info'
 @app.route('/')
 def index():
     return render_template('index.html')
+
 ### ====================================================================================================
 
 #////-----INICIA SESION EN SPOTIFY-----////
@@ -29,13 +30,7 @@ def redirect_page():
     code = request.args.get('code')
     token_info = create_spotify_oauth().get_access_token(code)
     session[TOKEN_INFO] = token_info
-    #return redirect(url_for('save_discover_weekly', _external = True)) ## despues del redirect te lleva a save_discover_weekly
     return redirect(url_for('select_playlist', _external = True))
-
-#////-----BOTON PARA CLONAR-----////
-#@app.route('/click_to_function')
-#def click_to_function():
-#    return render_template('click_to_function.html')
 
 #////-----SELECT PLAYLIST-----////
 @app.route('/select_playlist')
@@ -102,7 +97,7 @@ def clone_playlist():
     #para crear la nueva pl pide: user_id, id de la pl objetivo, song_uris
     sp.user_playlist_add_tracks(user_id, cloned_playlist_id, song_uris, None)
     
-    return('SUCCESS!!!!')
+    return render_template('success.html')
 
 ### ====================================================================================================
 
