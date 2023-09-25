@@ -14,7 +14,6 @@ TOKEN_INFO = 'token_info'
 @app.route('/')
 def index():
     return render_template('index.html')
-
 ### ====================================================================================================
 
 #////-----INICIA SESION EN SPOTIFY-----////
@@ -57,6 +56,7 @@ def select_playlist():
 @app.route('/clone_playlist', methods=['POST'])
 def clone_playlist():
     to_clone_playlist_id = request.form.get('playlist_id') #nos la traemos de la forma(en select_pl.html)
+    cloned_playlist_name = request.form.get('playlist_name') #nos la traemos de la forma(en select_pl.html)
 
 
     #----->>>>>
@@ -80,16 +80,18 @@ def clone_playlist():
     #recorremos todas las pl que ya tenemos
     for playlist in current_playlists:
         #Vemos si ya esta clonada
-        if(playlist['name'] == 'CLONED'):
-            print("CLONED IS IN PLAYLISTS || ID:", playlist['id'])
+        #if(playlist['name'] == 'CLONED'):
+        if(playlist['name'] == cloned_playlist_name):
+            print("{} IS IN PLAYLISTS || ID:".format(cloned_playlist_name), playlist['id'])
             cloned_playlist_id = playlist['id']
-            print("====>>>>CLONED_id:", cloned_playlist_id)
+            print("====>>>>{}_id:".format(cloned_playlist_name), cloned_playlist_id)
             
     #si no existe la clonada, la hacemos
+    #CREAMOS PLAYLIST
     if not cloned_playlist_id:    
-        new_playlist = sp.user_playlist_create(user_id, 'CLONED', True)
+        new_playlist = sp.user_playlist_create(user_id, cloned_playlist_name, True)
         cloned_playlist_id = new_playlist['id']
-
+    
     to_clone_playlist = sp.playlist_items(to_clone_playlist_id) #le sacamos el id a la pl a clonar
     song_uris = []
     
@@ -101,61 +103,6 @@ def clone_playlist():
     sp.user_playlist_add_tracks(user_id, cloned_playlist_id, song_uris, None)
     
     return('SUCCESS!!!!')
-
-    
-    # Redirect to a success page or another appropriate page
-    #return 'Playlist cloning in progress...'
-
-#////-----SAVE DISCOVER PLAYLIST (ORIGINAL)-----////
-@app.route('/saveDiscoverWeekly')
-def save_discover_weekly():
-    
-    try:
-        token_info = get_token() #try to get token
-    except:
-        print('user not logged in') #log in 
-        return redirect('/')
-    
-    #return("OAUTH SUCCESSFUL")
-
-    sp = spotipy.Spotify(auth=token_info['access_token'])   #SPOTIFY function
-    user_id = sp.current_user()['id']                       #get USER from SPOTIFY function
-    cloned_playlist_id = None                         #we need to get this id later
-
-    current_playlists = sp.current_user_playlists()['items'] #Conjunto de playlists
-    
-    for playlist in current_playlists: #[PRINT PRUEBA] 
-        print(playlist['name'])        #[PRINT PRUEBA]
-    for playlist in current_playlists:
-        #para estar seguros, las playlist a tratar deben estar FUERA DE CARPETAS
-        if(playlist['name'] == 'LINGER'):
-            print("LINGER IS IN PLAYLISTS || ID:", playlist['id'])
-            linger_playlist_id = playlist['id']
-            print("====>>>>cloned_playlist_id:", cloned_playlist_id)
-            
-        if(playlist['name'] == 'Saved LINGER'):
-            print("SAVED LINGER IS IN PLAYLISTS || ID:", playlist['id'])
-            cloned_playlist_id = playlist['id']
-            print("====>>>>cloned_playlist_id:", cloned_playlist_id)
-        
-    if not linger_playlist_id:          #si no existe la pl original
-        return 'LINGER not found'
-
-    if not cloned_playlist_id:    #si no existe la duplicada: la hacemos
-        new_playlist = sp.user_playlist_create(user_id, 'Saved LINGER', True)
-        cloned_playlist_id = new_playlist['id']
-
-    linger_playlist = sp.playlist_items(linger_playlist_id) #playlist original
-    song_uris = []
-    for song in linger_playlist['items']:   #recorremos las canciones de la pl original
-        song_uri = song['track']['uri']     
-        song_uris.append(song_uri)
-    
-    #para crear la nueva pl pide: user_id, id de la pl objetivo, song_uris
-    sp.user_playlist_add_tracks(user_id, cloned_playlist_id, song_uris, None)
-    
-    return('SUCCESS!!!!')
-        
 
 ### ====================================================================================================
 
